@@ -1,6 +1,7 @@
 package trace
 
 import (
+	"context"
 	"fmt"
 	instana "github.com/instana/go-sensor"
 	opentrace "github.com/opentracing/opentracing-go"
