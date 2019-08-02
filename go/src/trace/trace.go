@@ -1,18 +1,15 @@
 package trace
 
 import (
-	instana "../../../go-sensor"
-	"context"
 	"fmt"
+	instana "github.com/instana/go-sensor"
 	opentrace "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"log"
 	"net/http"
+	"runtime/debug"
 	"strconv"
 	"strings"
-
-	//"os"
-	"runtime/debug"
 )
 
 const (
