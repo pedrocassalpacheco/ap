@@ -9,6 +9,7 @@ import (
 
 func main() {
 
+	log.Println("Let the tracing magic begin")
 	log.Println("Server started on: http://localhost:8080")
 	log.Printf("Tracing information %T", trace.GoSensor)
 	http.HandleFunc("/", Index)
