@@ -17,7 +17,19 @@ func DBConn() (db *sql.DB) {
 		panic(err.Error())
 	}
 
-	time.Sleep(1* time.Second)
+	time.Sleep(1 * time.Second)
+
+	return db
+}
+
+func DBConnectWithCredentials(dbDriver, dbUser, dbPass, dbName string) (db *sql.DB) {
+
+	db, err := sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	time.Sleep(1 * time.Second)
 
 	return db
 }

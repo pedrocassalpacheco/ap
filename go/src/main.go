@@ -19,6 +19,6 @@ func main() {
 	http.HandleFunc("/update", Update)
 	http.HandleFunc("/delete", Delete)
 	http.HandleFunc("/employees", trace.GoSensor.TracingHandler("employees", Employees))
+	http.HandleFunc("/error", trace.GoSensor.TracingHandler("error", Error))
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
-

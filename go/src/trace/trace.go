@@ -8,7 +8,11 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
+
 	//"os"
+	"runtime/debug"
 )
 
 const (
@@ -16,9 +20,9 @@ const (
 )
 
 var GoSensor *instana.Sensor
-var GoSensorOpts = instana.Options {
-	Service:	Service,
-	LogLevel:	instana.Error,
+var GoSensorOpts = instana.Options{
+	Service:  Service,
+	LogLevel: instana.Error,
 }
 var OTTracer opentrace.Tracer
 
@@ -32,37 +36,39 @@ func init() {
 
 }
 
-func GetTraceFromContext(ctx context.Context) {
-	parentSpan,ok := ctx.Value("parentSpan").(opentrace.Span)
+func GetTracerFromContext(ctx context.Context) opentrace.Tracer {
+	parentSpan, ok := ctx.Value("parentSpan").(opentrace.Span)
 
 	if ok == false {
-		OTTracer = nil
 		log.Panic("Unable to obtain parent span")
 	} else {
-		OTTracer = parentSpan.Tracer()
 		fmt.Printf("Retrieved tracer from context %T", parentSpan.Tracer())
 	}
-	return
+	return parentSpan.Tracer()
+}
+
+func GetTracersAndParentSpanFromContext(ctx context.Context) (opentrace.Tracer, opentrace.Span) {
+
+	parentSpan, ok := ctx.Value("parentSpan").(opentrace.Span)
+
+	if ok == false {
+		log.Panic("Unable to obtain parent span")
+	} else {
+		fmt.Printf("Retrieved tracer from context %T", parentSpan.Tracer())
+	}
+	return parentSpan.Tracer(), parentSpan
 }
 
 func TraceSQLExecution(r *http.Request, sql string, comments string) opentrace.Span {
 
-	// Parent span
-	parentSpan, ok := r.Context().Value("parentSpan").(opentrace.Span)
-
-	if ok == false {
-		OTTracer = nil
-		log.Panic("Unable to obtain parent span")
-	}
-
-	// Does this work?
-	tracer := parentSpan.Tracer()
+	// Tracer from context
+	tracer, parentSpan := GetTracersAndParentSpanFromContext(r.Context())
 
 	childSpan := tracer.StartSpan("SQL", opentrace.ChildOf(parentSpan.Context()))
-	childSpan.SetTag(string(ext.SpanKind), 	"client")
-	childSpan.SetTag(string(ext.DBType), 	"MySQL")
-	childSpan.SetTag(string(ext.DBInstance),"people")
-	childSpan.SetTag(string(ext.DBUser), 	"pedro")
+	childSpan.SetTag(string(ext.SpanKind), "client")
+	childSpan.SetTag(string(ext.DBType), "MySQL")
+	childSpan.SetTag(string(ext.DBInstance), "people")
+	childSpan.SetTag(string(ext.DBUser), "pedro")
 	childSpan.SetTag(string(ext.DBStatement), sql)
 	childSpan.SetBaggageItem("Comments", comments)
 
@@ -72,23 +78,15 @@ func TraceSQLExecution(r *http.Request, sql string, comments string) opentrace.S
 
 func TraceDBConnection(r *http.Request, comments string) opentrace.Span {
 
-	// Parent span
-	parentSpan, ok := r.Context().Value("parentSpan").(opentrace.Span)
-
-	if ok == false {
-		OTTracer = nil
-		log.Panic("Unable to obtain parent span")
-	}
-
-	// Does this work?
-	tracer := parentSpan.Tracer()
+	// Tracer from context
+	tracer, parentSpan := GetTracersAndParentSpanFromContext(r.Context())
 
 	childSpan := tracer.StartSpan("Connection", opentrace.ChildOf(parentSpan.Context()))
-	childSpan.SetTag(string(ext.SpanKind), 		"client")
-	childSpan.SetTag(string(ext.DBType),		"MySQL" )
-	childSpan.SetTag(string(ext.DBInstance), 	"people")
-	childSpan.SetTag(string(ext.DBUser), 		"pedro")
-	childSpan.SetTag(string(ext.DBStatement), 	"connect")
+	childSpan.SetTag(string(ext.SpanKind), "client")
+	childSpan.SetTag(string(ext.DBType), "MySQL")
+	childSpan.SetTag(string(ext.DBInstance), "people")
+	childSpan.SetTag(string(ext.DBUser), "pedro")
+	childSpan.SetTag(string(ext.DBStatement), "connect")
 	childSpan.SetBaggageItem("Comments", comments)
 
 	return childSpan
@@ -96,18 +94,11 @@ func TraceDBConnection(r *http.Request, comments string) opentrace.Span {
 
 func TraceFunctionExecution(r *http.Request, f func(), comments string) {
 
-	// Parent span
-	parentSpan, ok := r.Context().Value("parentSpan").(opentrace.Span)
-
-	if ok == false {
-		OTTracer = nil
-		log.Panic("Unable to obtain parent span")
-	}
-
-	tracer := parentSpan.Tracer()
+	// Tracer from context
+	tracer, parentSpan := GetTracersAndParentSpanFromContext(r.Context())
 
 	childSpan := tracer.StartSpan("method", opentrace.ChildOf(parentSpan.Context()))
-	childSpan.SetTag(string(ext.SpanKind), 	"intermediate")
+	childSpan.SetTag(string(ext.SpanKind), "intermediate")
 	childSpan.SetTag(string(ext.Component), "method")
 	childSpan.SetBaggageItem("Comments", comments)
 
@@ -118,4 +109,39 @@ func TraceFunctionExecution(r *http.Request, f func(), comments string) {
 
 }
 
+func TraceError(r *http.Request, errorCode int, message string) {
+	// Parent span
+	parentSpan, ok := r.Context().Value("parentSpan").(opentrace.Span)
 
+	if ok == false {
+		OTTracer = nil
+		log.Panic("Unable to obtain parent span")
+	}
+
+	parentSpan.SetTag(string(ext.Error), true)
+	parentSpan.SetTag(string(ext.HTTPStatusCode), errorCode)
+	parentSpan.SetTag("message", message)
+}
+
+func TracePanic(r *http.Request, message string) {
+	// Parent span
+	parentSpan, ok := r.Context().Value("parentSpan").(opentrace.Span)
+
+	if ok == false {
+		OTTracer = nil
+		log.Panic("Unable to obtain parent span")
+	}
+
+	parentSpan.SetTag(string(ext.Error), true)
+	parentSpan.SetTag("message", message)
+	stackTrace := string(debug.Stack())
+
+	stackTraceLines := strings.Split(stackTrace, "\n")
+	parentSpan.SetBaggageItem("Stack Trace", "Error details")
+	for i, line := range stackTraceLines {
+		fmt.Println(line)
+		parentSpan.SetBaggageItem(strconv.Itoa(i), line)
+	}
+
+	panic(message)
+}

@@ -5,6 +5,7 @@ import (
 	"../types"
 	"../util"
 	"encoding/json"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"time"
 
@@ -13,7 +14,12 @@ import (
 	"net/http"
 )
 
+func Error(w http.ResponseWriter, r *http.Request) {
+	db := util.DBConnectWithCredentials("mysql", "root", "wrongpassword", "people")
+	fmt.Println(db)
 
+	trace.TracePanic(r, "Unable to process request. Database not available")
+}
 func Employees(w http.ResponseWriter, r *http.Request) {
 
 	// Fetch all employees
@@ -22,8 +28,8 @@ func Employees(w http.ResponseWriter, r *http.Request) {
 	db := util.DBConn()
 	connectionSpan.Finish()
 
-	trace.TraceFunctionExecution(r, func () {
-		time.Sleep(1*time.Second)
+	trace.TraceFunctionExecution(r, func() {
+		time.Sleep(1 * time.Second)
 	}, "Going to sleep")
 
 	//time.Sleep(1 * time.Second)
@@ -50,7 +56,7 @@ func Employees(w http.ResponseWriter, r *http.Request) {
 		emp.City = city
 		res = append(res, emp)
 	}
-	time.Sleep(5*time.Second)
+	time.Sleep(5 * time.Second)
 	sqlSpan.Finish()
 
 	// Marshall
