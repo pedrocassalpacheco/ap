@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"text/template"
-	//ot "github.com/opentracing/opentracing-go"
 )
 
 var tmpl = template.Must(template.ParseGlob("form/*"))

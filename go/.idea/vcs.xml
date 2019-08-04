@@ -5,14 +5,17 @@
     <mapping directory="$PROJECT_DIR$/src/github.com/felixge/httpsnoop" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/go-sql-driver/mysql" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/gogo/protobuf" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/github.com/instana/go-sensor" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/looplab/fsm" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/opentracing/basictracer-go" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/opentracing/opentracing-go" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/stretchr/testify" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/golang.org/x/crypto" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/golang.org/x/net" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/golang.org/x/sync" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/golang.org/x/sys" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/golang.org/x/text" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/golang.org/x/tools" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/gopkg.in/yaml.v2" vcs="Git" />
   </component>
 </project>

@@ -7,11 +7,9 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"time"
-
-	//"github.com/opentracing/opentracing-go"
 	"log"
 	"net/http"
+	"time"
 )
 
 func Error(w http.ResponseWriter, r *http.Request) {
