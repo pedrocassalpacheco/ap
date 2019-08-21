@@ -3,15 +3,21 @@ package main
 import (
 	. "./services"
 	"./trace"
+	"./util"
+	"fmt"
 	"log"
 	"net/http"
 )
 
+func init() {
+	util.Configure()
+}
 func main() {
 
-	log.Println("Let the tracing magic begin")
-	log.Println("Server started on: http://localhost:8080")
-	log.Printf("Tracing information %T", trace.GoSensor)
+	// Arguments
+	port := util.Configure().Port
+	log.Println("Server started on: http://localhost:", port)
+	log.Printf("Using tracer %T", trace.GoSensor)
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/show", Show)
 	http.HandleFunc("/new", New)
@@ -20,6 +26,7 @@ func main() {
 	http.HandleFunc("/update", Update)
 	http.HandleFunc("/delete", Delete)
 	http.HandleFunc("/employees", trace.GoSensor.TracingHandler("employees", Employees))
+	http.HandleFunc("/step2", trace.GoSensor.TracingHandler("employees", Step2))
 	http.HandleFunc("/error", trace.GoSensor.TracingHandler("error", Error))
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
 }

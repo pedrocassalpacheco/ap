@@ -11,7 +11,7 @@ var connection = mysql.createConnection({
   password: 'password',
   database: 'people'
 })
-app.get('/', function (req, res) {
+app.get('/home', function (req, res) {
 //connection.connect()
 
 connection.query('SELECT * FROM employee', function (err, rows, fields) {
@@ -24,10 +24,9 @@ connection.query('SELECT * FROM employee', function (err, rows, fields) {
 	res.send("Hello World!")
 })
 
-app.get('/search', function (req, res) {
-  https.get('http://localhost:8080/employees', (resp) => {
+app.get('/step1', function (req, res) {
+  https.get('http://localhost:8080/step2', (resp) => {
     let data = '';
-
 
     resp.on('data', (chunk) => {
       data += chunk;
@@ -35,7 +34,8 @@ app.get('/search', function (req, res) {
 
     // The whole response has been received. Print out the result.
     resp.on('end', () => {
-      console.log(JSON.parse(data));
+      //console.log(JSON.parse(data));
+      console.log(data);
     });
 
   }).on("error", (err) => {
@@ -43,6 +43,5 @@ app.get('/search', function (req, res) {
   });
 
 })
-
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

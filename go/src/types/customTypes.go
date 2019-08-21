@@ -1,9 +1,9 @@
 package types
 
 type Employee struct {
-Id    int
-Name  string
-City string
+	Id    int
+	Name  string
+	City string
 }
 
 func NewEmployee(id int, name string, city string) *Employee {
